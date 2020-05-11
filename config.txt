@@ -1,0 +1,9 @@
+Важно!! в файле models.py 12 строчка
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:\\Users\\Arseny\\flask\\flask_app\\database.db'
+надо указать путь, где лежит бд 
+
+для Linux такая строчка
+app.config['SQLALCHEMY_DATABASE_URI'] = sqlite:////mnt/c/Users/Arseny/flask/flask_app/database.db
+
+для Windows такая строчка
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:\\Users\\Arseny\\flask\\flask_app\\database.db'
