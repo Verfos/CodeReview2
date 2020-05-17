@@ -1,9 +1,18 @@
 from views import *
-import argparse
+import pytest
+
+
+def test_login():
+    client = app.test_client()
+    rv = client.post('login', data=dict(username='example', passwaord='example'), follow_redirects=True)
+    assert 60 == rv.data[0]
+
+
+def test_testing():
+    client = app.test_client()
+    rv = client.post('login', data=dict(username='example', password='example'))
+    assert rv.status_code == 200
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Testing App')
-    parser.add_argument('port', type=int, nargs='?', default = 5000)
-    parser.add_argument('host', type=str, nargs='?',default = 'localhost')
-    arg = parser.parse_args()
-    app.run(debug=False, host=arg.host, port = arg.port)
+
+    app.run(debug=False, host=arg.host, port=arg.port)

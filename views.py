@@ -11,7 +11,6 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if not user or not check_password_hash(user.password, form.password.data):
@@ -25,7 +24,6 @@ def login():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     form = RegisterForm()
-
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data, method='sha256')
         new_user = User(username=form.username.data, email=form.email.data, password=hashed_password)
@@ -70,34 +68,34 @@ def update_user(answer, question_order, current_question):
         current_user_info.intuition += 1
     elif answer == 8:
         current_user_info.intuition += 1
-    current_user_info.current_answer +=1
-    db.session.query(User).filter_by(id=current_user.username).update({User.username: User.username}, synchronize_session = False)
-    new_current_question = db.session.query(Question).filter_by(question_order=question_order.current_answer).one() 
+    current_user_info.current_answer += 1
+    db.session.query(User).filter_by(id=current_user.username).update({User.username: User.username}, synchronize_session=False)
+    new_current_question = db.session.query(Question).filter_by(question_order=question_order.current_answer).first_or_404()
     new_number_of_question = current_question.number_of_answers
-    new_all_answers = db.session.query(Answer).filter_by(qu_id=current_question.id).all() 
+    new_all_answers = db.session.query(Answer).filter_by(qu_id=current_question.id).all()
     db.session.commit()
     if new_number_of_question == 2:
-        return render_template('testing.html', name=current_user.username, result=1, 
-                               answer1 = new_all_answers[0].answer_text, answer2 = new_all_answers[1].answer_text)
+        return render_template('testing.html', name=current_user.username, result=1,
+                               answer1=new_all_answers[0].answer_text, answer2=new_all_answers[1].answer_text)
     elif new_number_of_question == 4:
-        return render_template('testing1.html', name=current_user.username, result=1, 
-                               answer1 = new_all_answers[0].answer_text, answer2 = new_all_answers[1].answer_text, 
-                               answer3 = new_all_answers[1].answer_text,answer4 = new_all_answers[1].answer_text)
+        return render_template('testing1.html', name=current_user.username, result=1,
+                               answer1=new_all_answers[0].answer_text, answer2=new_all_answers[1].answer_text,
+                               answer3=new_all_answers[1].answer_text, answer4=new_all_answers[1].answer_text)
     else:
-        return redirect(url_for('dashboard')) 
+        return redirect(url_for('dashboard'))
 
 
 @app.route('/testing', methods=['GET', 'POST'])
 @login_required
-def testing():    
+def testing():
     current_user_info = db.session.query(UserTest).filter_by(id=current_user.id).one()
     if current_user_info.current_answer >= 20:
         return '<h1>Вы прошли тест!</h1>'
-    current_question = db.session.query(Question).filter_by(question_order = current_user_info.current_answer).one() 
+    current_question = db.session.query(Question).filter_by(question_order=current_user_info.current_answer).first_or_404()
     number_of_question = current_question.number_of_answers
-    all_answers = db.session.query(Answer).filter_by(qu_id=current_question.id).all() 
+    all_answers = db.session.query(Answer).filter_by(qu_id=current_question.id).all()
     answer = current_user.username
-    if request.method =='POST':
+    if request.method == 'POST':
         chosen_answer = request.form['submit']
         if chosen_answer == 'profile1':
             updated_answer = all_answers[0].where_plus
@@ -109,13 +107,13 @@ def testing():
             updated_answer = all_answers[3].where_plus
         update_user(updated_answer, current_user_info, current_question)
     if number_of_question == 2:
-        return render_template('testing.html', name = answer, result=1,
-                              answer1 = all_answers[0].answer_text, answer2=all_answers[1].answer_text)
+        return render_template('testing.html', name=answer, result=1,
+                              answer1=all_answers[0].answer_text, answer2=all_answers[1].answer_text)
     elif number_of_question == 4:
-        return render_template('testing1.html', name = answer, result=1, answer1 = all_answers[0].answer_text,
+        return render_template('testing1.html', name=answer, result=1, answer1=all_answers[0].answer_text,
                               answer2=all_answers[1].answer_text, answer3=all_answers[2].answer_text, answer4=all_answers[3].answer_text)
     else:
-        return redirect(url_for('dashboard')) 
+        return redirect(url_for('dashboard'))
 
 
 @app.route('/yourtype', methods=['GET', 'POST'])
