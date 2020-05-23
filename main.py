@@ -4,8 +4,8 @@ import pytest
 
 def test_login():
     client = app.test_client()
-    rv = client.post('login', data=dict(username='example', passwaord='example'), follow_redirects=True)
-    assert 60 == rv.data[0]
+    client_respone = client.post('login', data=dict(username='example', passwaord='example'), follow_redirects=True)
+    assert 60 == client_respone.data[0]
 
 
 def test_testing():
@@ -14,5 +14,4 @@ def test_testing():
     assert rv.status_code == 200
 
 if __name__ == '__main__':
-
-    app.run(debug=False, host=arg.host, port=arg.port)
+    app.run(debug=False, host=args.host, port=args.port)

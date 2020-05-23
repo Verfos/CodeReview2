@@ -6,6 +6,11 @@ from config import *
 
 
 class User(UserMixin, db.Model):
+    """Класс позьзователя для работы с сайтом.
+
+    Хранит данные о пользователе и хранит информацию
+    о состоянии пользователя на сайте
+    """
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(15), unique=True)
     email = db.Column(db.String(50), unique=True)
@@ -23,6 +28,10 @@ class Question(db.Model):
 
 
 class UserTest(db.Model):
+    """Класс  для хранения информации о тестировании пользователя.
+
+    Хранит данные о текущем прогрессе позьзователя
+    """
     id = db.Column(db.Integer, primary_key=True)
     current_answer = db.Column(db.Integer)
     logics = db.Column(db.Integer)

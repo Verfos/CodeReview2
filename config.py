@@ -5,16 +5,19 @@ from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 import argparse
 
-parser = argparse.ArgumentParser(description='Testing App')
-parser.add_argument('db', type=str, nargs='?', default=5000)
-parser.add_argument('port', type=int, nargs='?', default=5000)
-parser.add_argument('host', type=str, nargs='?', default='localhost')
 
-arg = parser.parse_args()
+def parse_args():
+    parser = argparse.ArgumentParser(description='Testing App')
+    parser.add_argument('db', type=str, nargs='?', default='5000')
+    parser.add_argument('port', type=int, nargs='?', default=5000)
+    parser.add_argument('host', type=str, nargs='?', default='localhost')
+    return parser.parse_args()
+
+args = parse_args()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Secret'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + arg.db
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + args.db
 bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
 login_manager = LoginManager()

@@ -1,6 +1,7 @@
 from flask import render_template, redirect, url_for, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import *
+from enum import Enum
 
 
 @app.route('/')
@@ -14,7 +15,7 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if not user or not check_password_hash(user.password, form.password.data):
-            return '<h1>Invalid username or password</h1>'
+            return render_template('login2.html')
         login_user(user, remember=form.remember.data)
         return redirect(url_for('dashboard'))
 
@@ -32,7 +33,7 @@ def signup():
         db.session.add(new_user1)
         db.session.commit()
 
-        return '<h1>New user has been created!</h1>'
+        return render_template('signup2.html')
 
     return render_template('signup.html', form=form)
 
@@ -50,8 +51,7 @@ def logout():
     return redirect(url_for('index'))
 
 
-def update_user(answer, question_order, current_question):
-    current_user_info = db.session.query(UserTest).get(current_user.id)
+def update_answer(current_user_info, answer):
     if answer == 1:
         current_user_info.logics += 1
     elif answer == 2:
@@ -69,11 +69,9 @@ def update_user(answer, question_order, current_question):
     elif answer == 8:
         current_user_info.intuition += 1
     current_user_info.current_answer += 1
-    db.session.query(User).filter_by(id=current_user.username).update({User.username: User.username}, synchronize_session=False)
-    new_current_question = db.session.query(Question).filter_by(question_order=question_order.current_answer).first_or_404()
-    new_number_of_question = current_question.number_of_answers
-    new_all_answers = db.session.query(Answer).filter_by(qu_id=current_question.id).all()
-    db.session.commit()
+
+
+def render_answer(current_user, new_number_of_question, new_all_answers):
     if new_number_of_question == 2:
         return render_template('testing.html', name=current_user.username, result=1,
                                answer1=new_all_answers[0].answer_text, answer2=new_all_answers[1].answer_text)
@@ -85,13 +83,27 @@ def update_user(answer, question_order, current_question):
         return redirect(url_for('dashboard'))
 
 
+def update_user(answer, question_order, current_question):
+    current_user_info = db.session.query(UserTest).get(current_user.id)
+    update_answer(current_user_info, answer)
+    db.session.query(User).filter_by(id=current_user.username).update({User.username: User.username})
+    order = question_order.current_answer
+    new_current_question = db.session.query(Question).filter_by(question_order=order).first_or_404()
+    new_number_of_question = current_question.number_of_answers
+    new_all_answers = db.session.query(Answer).filter_by(qu_id=current_question.id).all()
+    db.session.commit()
+    new_render = render_answer(current_user, new_number_of_question, new_all_answers)
+    return new_render
+
+
 @app.route('/testing', methods=['GET', 'POST'])
 @login_required
 def testing():
     current_user_info = db.session.query(UserTest).filter_by(id=current_user.id).one()
     if current_user_info.current_answer >= 20:
-        return '<h1>Вы прошли тест!</h1>'
-    current_question = db.session.query(Question).filter_by(question_order=current_user_info.current_answer).first_or_404()
+        return render_template('testing3.html')
+    order = current_user_info.current_answer
+    current_question = db.session.query(Question).filter_by(question_order=order).first_or_404()
     number_of_question = current_question.number_of_answers
     all_answers = db.session.query(Answer).filter_by(qu_id=current_question.id).all()
     answer = current_user.username
@@ -106,25 +118,19 @@ def testing():
         elif chosen_answer == 'profile4':
             updated_answer = all_answers[3].where_plus
         update_user(updated_answer, current_user_info, current_question)
-    if number_of_question == 2:
-        return render_template('testing.html', name=answer, result=1,
-                              answer1=all_answers[0].answer_text, answer2=all_answers[1].answer_text)
-    elif number_of_question == 4:
-        return render_template('testing1.html', name=answer, result=1, answer1=all_answers[0].answer_text,
-                              answer2=all_answers[1].answer_text, answer3=all_answers[2].answer_text, answer4=all_answers[3].answer_text)
-    else:
-        return redirect(url_for('dashboard'))
+    new_render = render_answer(current_user, number_of_question, all_answers)
+    return new_render
 
 
-@app.route('/yourtype', methods=['GET', 'POST'])
+@app.route('/show_your_type', methods=['GET', 'POST'])
 @login_required
-def yourtype():
+def show_your_type():
     current_user_info = db.session.query(UserTest).filter_by(id=current_user.id).one()
     first = "Рациоанльный" if current_user_info.logics > 0 else "Иррациональный"
     second = "Этический" if current_user_info.ethics > 0 else "Сенсорный"
     third = "Логический" if current_user_info.sensitive > 0 else "Интуитивный"
     fourth = "Экстроверт" if current_user_info.intuition > 0 else "Интроверт"
-    userType = "Ваш тип:" + " " + first + " " + second + " " + third + " " + fourth
+    user_type = "Ваш тип:" + " " + first + " " + second + " " + third + " " + fourth
     if current_user_info.current_answer >= 20:
-        return render_template('yourtype.html', out=userType)
-    return render_template('yourtype.html', out="Вы ещё не прошли тест")
+        return render_template('show_your_type.html', out=user_type)
+    return render_template('show_your_type.html', out="Вы ещё не прошли тест")
