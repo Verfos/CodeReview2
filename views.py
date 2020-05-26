@@ -1,6 +1,7 @@
 from flask import render_template, redirect, url_for, request
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import *
+from models import app, login_required, args, RegisterForm, User, UserTest, Question, Answer, \
+     LoginForm, db, login_user, current_user, logout_user
 from enum import Enum
 
 
@@ -126,7 +127,7 @@ def testing():
 @login_required
 def show_your_type():
     current_user_info = db.session.query(UserTest).filter_by(id=current_user.id).one()
-    first = "Рациоанльный" if current_user_info.logics > 0 else "Иррациональный"
+    first = "Рациоанальный" if current_user_info.logics > 0 else "Иррациональный"
     second = "Этический" if current_user_info.ethics > 0 else "Сенсорный"
     third = "Логический" if current_user_info.sensitive > 0 else "Интуитивный"
     fourth = "Экстроверт" if current_user_info.intuition > 0 else "Интроверт"

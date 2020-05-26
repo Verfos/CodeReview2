@@ -13,6 +13,7 @@ def parse_args():
     parser.add_argument('host', type=str, nargs='?', default='localhost')
     return parser.parse_args()
 
+
 args = parse_args()
 
 app = Flask(__name__)
