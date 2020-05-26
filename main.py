@@ -34,8 +34,21 @@ def test_update_answer():
     assert user.logics == 1
     assert user.ethics == 0
     assert user.sensitive == 0
-    assert user.intuition == 0 
+    assert user.intuition == 0
     
+    for i in range (10):
+        update_answer(user, 1)
+    assert user.current_answer == 12
     
+    for i in range (1,8,2):
+        print(i)
+        update_answer(user, i)
+    
+    assert user.logics == 12
+    assert user.ethics == 1
+    assert user.sensitive == 1
+    assert user.intuition == 1
+    
+
 if __name__ == '__main__':
     app.run(debug=False, host=args.host, port=args.port)
