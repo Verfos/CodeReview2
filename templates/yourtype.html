@@ -1,0 +1,18 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+Testing
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='signin.css')}}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <form class="form-signin"">
+        <h2 class="form-signin-heading">{{out}}</h2>
+    </form>
+</div> <!-- /container -->
+{% endblock %}
